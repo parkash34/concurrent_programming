@@ -53,7 +53,7 @@ concurrent-programming/
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/your-username/concurrent-programming.git
+   git clone https://github.com/parkash34/concurrent_programming.git
    cd concurrent-programming
    ```
 
