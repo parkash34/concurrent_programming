@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 public class PrintThread{
         public static void main(String[] args) throws InterruptedException, IOException{
         Thread[] ts = new Thread[10];
+        System.out.println("Available Processors: " + Runtime.getRuntime().availableProcessors());
         for(int i = 0; i < ts.length; i++){
             // int fi = i;
             ts[i] = new Thread(() -> {
@@ -18,6 +19,7 @@ public class PrintThread{
                 } catch(IOException e){}
             });
         }
+        long startTime = System.nanoTime();
         for(int i = 0; i < ts.length; i++){
             ts[i].start();
         }
@@ -34,7 +36,7 @@ public class PrintThread{
         for(int i = 0; i < ts.length; i++){
             ts[i].join();
         }
-
+        System.out.println("Total time: " + (System.nanoTime() - startTime)*1e-9 + "s");
         try(PrintWriter pw = new PrintWriter("out.txt")){
             
             Thread t1 = null, t2 = null;
