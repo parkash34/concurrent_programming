@@ -1,4 +1,4 @@
-// package week2;
+package week2;
 
 import java.io.PrintWriter;
 import java.io.IOException;
