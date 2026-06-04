@@ -1,0 +1,924 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Concurrent programming Lab exercises</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <link rel="stylesheet" href="labs.css" />
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Concurrent programming Lab exercises</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#java-recap" id="toc-java-recap">Java recap</a></li>
+<li><a href="#creating-threads" id="toc-creating-threads">Creating
+threads</a></li>
+<li><a href="#synchronized-1" id="toc-synchronized-1"><code
+class="sourceCode java"><span class="kw">synchronized</span></code></a></li>
+<li><a href="#executorservice-1" id="toc-executorservice-1"><code
+class="sourceCode java"><span class="bu">ExecutorService</span></code></a></li>
+<li><a href="#synchronized-data-structures"
+id="toc-synchronized-data-structures">Synchronized Data
+Structures</a></li>
+<li><a href="#exercise" id="toc-exercise">Exercise</a></li>
+<li><a href="#assignments" id="toc-assignments">Assignments</a></li>
+</ul>
+</nav>
+<!--
+Compile it like this:
+    pandoc labs.md -s --toc -L scripts/slides.lua -V lang=en -o labs-en.html
+    pandoc labs.md -s --toc -L scripts/slides.lua -V lang=hu -o labs-hu.html
+-->
+<h1 class="en" id="java-recap">Java recap</h1>
+<ol type="1">
+<li><p>Simple Java class</p>
+<p>Create a Java class called <code>Employee</code>. An
+<code>Employee</code> has two private fields, called <code>name</code>
+and <code>salary</code>. Create a public constructor that initializes
+these fields. Also create public getters for these fields and a method
+that raises the salary by a given percent (a floating point value passed
+as parameter).</p>
+<p>In this exercise and all the other ones, create a class whose
+<code>main</code> method tests the described functionality. Make sure
+that you can compile the code and run it.</p></li>
+<li><p>Abstract class and inheritance</p>
+<p>Change the <code>Employee</code> class to an abstract class. Also
+create two subclasses called <code>Manager</code> and
+<code>Subordinate</code>. Make the getter for the salary field in the
+<code>Employee</code> class abstract and copy its original logic into an
+override in the <code>Subordinate</code> class. For the
+<code>Manager</code> class also store a list of <code>Employee</code>s.
+Create functions for adding and removing <code>Employee</code>s of a
+<code>Manager</code>. Override the <code>getSalary()</code> function of
+a <code>Manager</code> to return the sum of the own salary of the
+manager plus 5% of each of its <code>Employee</code>s’ salary.</p></li>
+<li><p>Interface</p>
+<p>Create an interface called <code>SalariedEntity</code> with a single
+<code>getSalary()</code> function. Change the class
+<code>Employee</code> to inherit from this interface. Also create a
+class <code>Subcontractor</code> which also implements this interface.
+Instead of a name, <code>Subcontractor</code>s have a tax number
+(<code>long</code>).</p></li>
+<li><p>🏠 Homework</p>
+<p>Create a new class called <code>Company</code> which contains a list
+of <code>SalariedEntities</code>. Create functions to add a new entity,
+delete entities and also one which raises all the salaries by a specific
+percent, but only for the <code>Employees</code>.</p></li>
+</ol>
+<h1 class="en" id="creating-threads">Creating threads</h1>
+<ol type="1">
+<li><p>Make two threads and run them. The threads will print the texts
+<code>hello</code> and <code>world</code> lots of times
+(e.g. <code>10_000</code>) using <code>System.out.println()</code>.</p>
+<p>Create a child class of <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Thread.html"><code>Thread</code></a>,
+and write your implementation into its <code>run()</code>. To start the
+threads, make two instances of your new class and call
+<code>start()</code> on them.</p>
+<ol type="a">
+<li>Notice that the outputs are interleaved.
+<ol type="a">
+<li>Make another solution that prints letter by letter, using the
+<code>print()</code> method of <code>System.out</code>, not
+<code>println()</code>.</li>
+</ol></li>
+<li>Try what happens if you run the above by invoking the
+<code>run()</code> method instead of <code>start()</code>. This way, no
+new execution threads will be started.</li>
+<li>Also create a solution where you write the output to a file instead
+of the standard output using <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/io/PrintWriter.html"><code>PrintWriter</code></a>.</li>
+<li>Make other solutions by creating <code>Thread</code> objects in
+different ways. In each case, consider whether it is possible to write
+the code in such a way that the common part of the action of the two
+threads (to print something) is not repeated in the code, but appears
+only once, and the threads parameterize this by specifying exactly what
+text to write out.
+<ul>
+<li>using a child class of <code>Thread</code></li>
+<li>using a class that implements the <code>Runnable</code>
+interface</li>
+<li>using an anonymous class derived from <code>Thread</code></li>
+<li>using an anonymous class derived from <code>Runnable</code></li>
+<li>by passing a lambda to the <code>Thread</code> constructor</li>
+</ul></li>
+</ol></li>
+<li><p>Experiment with threads.</p>
+<ul>
+<li>Name the threads using <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Thread.html#setName(java.lang.String)"><code>setName</code></a>.</li>
+<li>Create a <a
+href="https://download.java.net/java/early_access/loom/docs/api/java.base/java/lang/ThreadGroup.html"><code>ThreadGroup</code></a>
+instance and pass it as the first argument at thread instantiation.
+<ul>
+<li>Using the <a
+href="https://download.java.net/java/early_access/loom/docs/api/java.base/java/lang/ThreadGroup.html#activeCount()"><code>activeCount()</code></a>
+and <a
+href="https://download.java.net/java/early_access/loom/docs/api/java.base/java/lang/ThreadGroup.html#list()"><code>list()</code></a>
+methods, observe the execution of the threads.</li>
+</ul></li>
+<li>➿ Optional: use an IDE to suspend threads in <em>debug</em> mode.
+<ul>
+<li>Examine the contents of their variables using the debugger.</li>
+<li>Rewrite the values of the variables and continue running.</li>
+</ul></li>
+</ul></li>
+<li><p>🏠 Homework: check that execution using multiple threads causes
+significant speedup.</p>
+<ul>
+<li>Add up the numbers of the interval <code>1..1_000_000_000</code> on
+a thread. Measure how long it takes using <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/System.html#nanoTime()"><code>System.nanoTime()</code></a>.</li>
+<li>Then start <code>10</code> threads, which add up the numbers of the
+interval <code>1..1_000_000_000</code>:
+<ul>
+<li>The first thread works on the interval <code>1..100_000_000</code>,
+the second thread works on the interval
+<code>100_000_001..200_000_000</code> etc.</li>
+<li>Put the sum into a <code>static</code> variable.</li>
+<li>Calculate how long it takes using <code>System.nanoTime()</code> and
+print it at the end of the execution of the thread.</li>
+</ul></li>
+</ul></li>
+<li><p>📺 Demo: Thread operations: start, join, sleep, interrupt</p>
+<p>Running <code>DemoBasicThreading.java</code> showcases all examples.
+Each functionality has its own file, and
+<code>DemoBasicThreadingHelper.java</code> contains helper functions
+used by multiple examples.</p>
+<ol type="1">
+<li>Class extending Thread: <code>ClassExtendingThread.java</code></li>
+<li>Class implementing Runnable:
+<code>ClassImplementingRunnable.java</code></li>
+<li>Thread Creation: <code>ThreadCreationExample.java</code></li>
+<li>Join, Sleep &amp; Synchornized:
+<code>JoinSleepSynchronizedExample.java</code></li>
+<li>Interrupting a Thread:
+<code>LifecycleInterruptExample.java</code></li>
+</ol></li>
+<li><p>Join, sleep, interrupt</p>
+<ol type="a">
+<li>Change the <strong>Make two threads…</strong> program to print the
+message <code>ready</code> after both threads finish.
+<ul>
+<li>For a quicker finish, you may lower the constant to
+<code>1000</code>.</li>
+<li>Use the <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Thread.html#join()"><code>join</code></a>
+method of class <code>Thread</code> to wait for a thread to finish.
+<ul>
+<li>Do not forget to catch <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/InterruptedException.html"><code>InterruptedException</code></a>.</li>
+</ul></li>
+</ul></li>
+<li>Waiting inside Threads<br />
+Let the program to wait 5 milliseconds between printouts using the
+static method <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Thread.html#sleep(long)"><code>sleep</code></a>
+of class <code>Thread</code> to wait inside a thread for a specific
+amount of time.
+<ul>
+<li>You will have to catch <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/InterruptedException.html"><code>InterruptedException</code></a>.</li>
+<li>Note that there is also a method called <code>wait()</code> which is
+completely different.</li>
+</ul></li>
+<li>Interrupting Threads<br />
+Interrupt both of the threads after a second. Use the <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Thread.html#interrupt()"><code>interrupt</code></a>
+method of class <code>Thread</code>.</li>
+<li>Restarting Interrupted Threads<br />
+Try to restart your threads after you interrupted them. What
+happens?</li>
+</ol></li>
+<li><p>Join, sleep, interrupt #2</p>
+<ul>
+<li>Start 10 threads, all counting from <code>1</code> to
+<code>1_000_000</code> and print each number to a file (<a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/io/PrintWriter.html"><code>PrintWriter</code></a>)
+with the same name as the thread name (<a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Thread.html#getName()"><code>getName()</code></a>).</li>
+<li>Let the method that starts the threads wait 1 second (<a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Thread.html#sleep(long)"><code>Thread.sleep</code></a>),
+then write the last line of the files associated with the threads to the
+standard output. Do you notice anything strange?</li>
+<li>Modify the solution to <em>join</em> the threads before final
+printout. To do this, call <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Thread.html#join()"><code>join()</code></a>
+on each thread.</li>
+<li>The <code>Thread.sleep</code> and <code>Thread.join</code>
+operations may throw checked exceptions, which must be handled in an
+appropriate <code>try-catch</code> block. For now, it is sufficient to
+create an empty <code>catch</code> branch, no “exception handling logic”
+is necessary.</li>
+</ul></li>
+<li><p>🏠 Homework</p>
+<p>Extend the solution to “<strong>Joining threads</strong>” by adding a
+new thread that prints out how many threads are still active every
+second
+(<code>Thread.currentThread().getThreadGroup().activeCount()</code>). If
+this is the only remaining thread, you may stop checking and let the
+program end.</p>
+<ul>
+<li>Use <code>Thread.sleep</code> for waiting.</li>
+<li>➿ Optional: create another solution using the <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/Timer.html#scheduleAtFixedRate(java.util.TimerTask,long,long)"><code>scheduleAtFixedRate</code></a>
+method of the <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/Timer.html"><code>Timer</code></a>
+class.</li>
+</ul></li>
+<li><p>🏠 Homework: Miner &amp; Builder Simulation</p>
+<p>The goal of this simulation is to have two types of workers
+(represented by threads) who are trying to build 5 houses – the miners
+are mining gold from the goldmine, while the builders, once they have
+enough gold to do so, build houses.</p>
+<ul>
+<li><code>Configuration.java</code>: This class contains the
+configurations for the simulation, such as duration of building a house,
+number of workers, etc. During completion this class should not be
+modified.</li>
+<li><code>Resources.java</code>: This class keeps track of all the
+resources used by the simulation – goldmine capacity, gold owned by the
+workers and number of houses built. During completion this class should
+not be modified.</li>
+<li><code>ThreadCraft.java</code>: This is the entry point of the
+simulation, containing the main method and behaviour of the workers.
+Implement the following:
+<ul>
+<li>Start the workers’ threads (miners and builders) with the provided
+action (<code>mineAction()</code> and <code>buildAction()</code>)</li>
+<li>Start a thread responsible for periodically logging the state of the
+simulation (<code>loggingAction()</code>)</li>
+<li>In the main function, make sure that the workers’ threads finish up
+before finally printing “Simulation over”</li>
+<li>Implement the <code>sleepForMsec(int msec)</code> method which is
+used to invoke sleep on a thread for a given time</li>
+</ul></li>
+</ul>
+<p>Upload only the <code>ThreadCraft.java</code> source file.</p></li>
+</ol>
+<h1 class="en" id="synchronized-1"><code
+class="sourceCode java"><span class="kw">synchronized</span></code></h1>
+<ol type="1">
+<li><p>Shared data</p>
+<p>Start two threads that access the same list. Make one put the odd
+numbers from <code>1..1_000_000</code> into it, and make the other put
+in the evens. Don’t synchronize access yet.</p>
+<ul>
+<li>Wait for both operations to complete, then observe the following
+surprising phenomena:
+<ul>
+<li>How many elements does the list have? (It should have exactly one
+million.)</li>
+<li>Are the elements in order?
+<ul>
+<li>Hint: use <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/List.html#subList(int,int)"><code>subList</code></a>
+to explore a section of the list.</li>
+<li>Or: print the number of inversions (a smaller value follows a larger
+value) in the list.</li>
+</ul></li>
+<li>If you run the program a couple of times, you may even see an
+exception.</li>
+</ul></li>
+<li>Now use a <code>synchronized</code> block around the call where you
+add an element to the list with the list itself as the lock.
+<ul>
+<li>How does the content of the list change?</li>
+<li>How about its element count?</li>
+<li>How about the order of the elements?</li>
+</ul></li>
+<li>➿ Optional: modify the insertion so that the elements end up in
+order. To achieve this, widen the scope of the <code>synchronized</code>
+block by including an <code>if</code> condition that makes sure that
+only the very next element can be inserted. Pay attention to not leaving
+out any value.
+<ul>
+<li>How does this change affect the execution time?</li>
+</ul></li>
+</ul></li>
+<li><p>🏠 Homework</p>
+<p>Generalise the “<strong>Shared data</strong>” exercise in the
+following ways by adding some parameters.</p>
+<ul>
+<li>Instead of using two threads, use <code>n</code> of them. Let each
+put every <code>n</code>th value of the range into the list.</li>
+<li>Let the boolean value <code>isSynchronized</code> dictate whether to
+use synchronization around the insertion call or not.</li>
+<li>Let the boolean value <code>isInOrder</code> dictate whether the
+values should be inserted in a strictly increasing order.</li>
+<li>➿ Optional: write the code so that functionality is not duplicated.
+<ul>
+<li>Hint: put the general code in a helper method, and call it with the
+appropriate parameters.</li>
+<li>Hint: the helper method returns a <code>Runnable</code>.</li>
+</ul></li>
+<li>Make a method <code>useThreads</code> that takes <code>n</code>,
+<code>isSynchronized</code>, and <code>isInOrder</code> as arguments.
+This method contains the code that was previously in
+<code>main</code>.</li>
+<li>In the actual <code>main</code>, call <code>useThreads</code> a
+couple of times with various sets of parameters. Use <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/System.html#nanoTime()"><code>System.nanoTime()</code></a>
+to measure and print execution times.</li>
+</ul></li>
+<li><p>Create class <code>ThreadSafeMutableInteger</code>, a simplified
+version of <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html"><code>java.util.concurrent.atomic.AtomicInteger</code></a>.</p>
+<ol type="a">
+<li><p>Implement the <code>ThreadSafeMutableInteger</code> class which
+contains an <code>int</code> field (you’re not allowed to use <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/atomic/AtomicInteger.html"><code>AtomicInteger</code></a>
+itself), and provides thread-safe read/write operations on it. Use the
+<code>synchronized</code> keyword (either on the methods or as a block).
+Let the following be part of the class:</p>
+<ul>
+<li>two constructors: <code>ThreadSafeMutableInteger()</code> and
+<code>ThreadSafeMutableInteger(int)</code></li>
+<li>basic read/write operations: <code>int get()</code> and
+<code>void set(int)</code></li>
+</ul></li>
+<li><p>In <code>main</code>, create a shared
+<code>ThreadSafeMutableInteger</code> and 10 threads that each increment
+its value <code>10_000_000</code> times. When all is done, print the
+result.</p></li>
+<li><p>Implement the following atomic operations.</p>
+<ul>
+<li><code>int getAndIncrement()</code></li>
+<li><code>int getAndDecrement()</code></li>
+<li><code>int getAndAdd(int v)</code></li>
+<li><code>int incrementAndGet()</code></li>
+<li><code>int decrementAndGet()</code></li>
+<li><code>addAndGet(int v)</code></li>
+</ul></li>
+<li><p>Also write the following code to ensure the correct operation of
+the other methods. Make a separate <code>main</code> for each use case,
+and check that the end result is <code>0</code>.</p>
+<ul>
+<li>Let half of the threads use <code>getAndIncrement</code>, the other
+half use <code>getAndDecrement</code>.</li>
+<li>Let half of the threads use <code>addAndGet</code> by
+<code>+2</code>, the other half by <code>-2</code>.</li>
+</ul></li>
+<li><p>In the previous exercise, make a version that uses a
+<code>get</code> and a <code>set</code> operation in sequence in place
+of the <code>getAndIncrement</code>/<code>getAndDecrement</code> calls.
+What is the outcome? Why is it so?</p></li>
+<li><p>➿ Optional: implement the following methods that allow user
+defined, atomic value transformations. Validate your solution in a new
+<code>main</code>.</p>
+<ul>
+<li><code>int getAndUpdate(IntUnaryOperator)</code></li>
+<li><code>int updateAndGet(IntUnaryOperator)</code></li>
+</ul></li>
+</ol></li>
+<li><p>🏠 Homework: create class <code>ThreadSafeMutableIntArray</code>,
+a simplified version of <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/atomic/AtomicIntegerArray.html"><code>java.util.concurrent.atomic.AtomicIntegerArray</code></a>.</p>
+<ol type="a">
+<li><p>Create the <code>ThreadSafeMutableIntArray</code> data structure
+that implements a thread-safe array of <code>int</code>s.</p>
+<ul>
+<li>All elements of the <code>ThreadSafeMutableIntArray</code> are
+initialised to <code>0</code>.</li>
+<li>As a representation, use <code>int[]</code>. You’re not allowed to
+use <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/atomic/AtomicIntegerArray.html"><code>AtomicIntegerArray</code></a>
+itself.</li>
+<li>Use an <code>int[]</code> field in the representation.</li>
+<li>⚠️ Important: make sure to let different threads access separate
+elements without blocking.
+<ul>
+<li>You are therefore <strong>not allowed to use
+<code>synchronized</code> methods</strong> as that would lock the whole
+<code>ThreadSafeMutableIntArray</code>.</li>
+<li>Rather, create an array of <code>Object</code>s called
+<code>locks</code>. Using these, the elements will be locked
+individually.</li>
+</ul></li>
+</ul></li>
+<li><p>Define the following.</p>
+<ul>
+<li>Constructor: <code>ThreadSafeMutableIntArray(int capacity)</code>
+which creates the backing array of size <code>capacity</code> and
+<code>locks</code> of similar size.
+<ul>
+<li>While the <code>int[]</code> is initialised right by default, you
+will have to create and insert <code>Object</code> instances into
+<code>locks</code>.</li>
+</ul></li>
+<li><code>int get(int idx)</code> and
+<code>void set(int idx, int newValue)</code>: these operations use
+synchronization with the <code>locks</code> object at index
+<code>idx</code>.</li>
+</ul></li>
+<li><p>Validate your solution in <code>main</code>: create 10 threads
+and a shared <code>ThreadSafeMutableIntArray</code> with two elements.
+Let half of the threads write the first element, and half the second
+one.</p>
+<ul>
+<li>Let each thread increase its target up until
+<code>10_000_000</code>.</li>
+<li>Print the results to the standard output.</li>
+<li>Do you experience anything strange? Can you do something about
+it?</li>
+</ul></li>
+<li><p>➿ Optional: implement the following methods that allow user
+defined, atomic value transformations. Validate your solution in a new
+<code>main</code>.</p>
+<ul>
+<li><code>int updateAndGet(int n, IntUnaryOperator)</code></li>
+<li><code>int getAndUpdate(int n, IntUnaryOperator)</code></li>
+</ul></li>
+</ol></li>
+</ol>
+<h1 class="en" id="executorservice-1"><code
+class="sourceCode java"><span class="bu">ExecutorService</span></code></h1>
+<ol type="1">
+<li><p>Let us represent a system where some clients take loans from a
+bank.</p>
+<p>Create a thread pool using <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/Executors.html#newFixedThreadPool(int)">Executors.newFixedThreadPool</a>.
+Use <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/ExecutorService.html#submit(java.lang.Runnable)">submit()</a>
+to add threads representing the clients into this pool.</p>
+<p>The clients take loans in many rounds (e.g. 10000), each time using
+<a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/ThreadLocalRandom.html#nextInt(int,int)">ThreadLocalRandom.current().nextInt(min,
+max)</a> to determine the amount of the loan (which should be between
+100 and 1000). The bank has a (properly synchronized) counter in a
+variable that always shows the total amount of loans taken. The clients
+themselves store how much loan they have taken, and at the end of their
+execution, they write this number into the appropriate element of an
+array.</p>
+<p>At the end of <code>main</code>, use <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/ExecutorService.html#shutdown()">shutdown()</a>
+and <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/ExecutorService.html#awaitTermination(long,java.util.concurrent.TimeUnit)">awaitTermination()</a>
+to wait for all client threads to finish. Once they’re all done, print
+the bank’s counter and also print the sum of the loans in the client
+array. The two numbers should match.</p></li>
+<li><p>We solve the same problem as before but now we use <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/ExecutorService.html#submit(java.util.concurrent.Callable)">a
+different submit() method</a>.</p>
+<p>At the end of the client thread’s code, do not write the loan amount
+into an array. Instead, let it be the return value of the anonymous
+function that is passed to <code>submit()</code>. The return of
+<code>submit()</code> is a <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/Future.html">Future</a>,
+which has a <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/Future.html#get()">get()</a>
+operation that gives you the computed loan amount.</p>
+<p>This time, invoke <code>shutdown()</code> on the pool only after
+summing/comparing the loans in the two different ways.</p></li>
+<li><p>🏠 Homework: let <code>main</code> in class
+<code>Switcheroo</code> start 10 threads. All threads have shared access
+to an array of 100 elements, initially all set to 1000. The threads
+repeat the following 10000 times: choosing two indexes at random, a
+random amount is transferred from the first index to the second one
+(decreasing the value at the first index to not lower than zero). Make
+sure that the transfer is properly synchronized.</p>
+<p>After all threads are done, check whether the total sum of the array
+remains.</p></li>
+<li><p>🏠 Homework: let <code>main</code> in class
+<code>InefficientSorter</code> start 10 threads. All threads have shared
+access to an array of 100 elements, initially all set to random values.
+The threads repeat the following 10000 times: choosing two indexes at
+random, they are swapped if the lower index contains the higher number.
+Make sure that the transfer is properly synchronized.</p>
+<p>With a high probability, this will result in a sorted array. Check
+whether it is so, and further check whether the resulting array contains
+exactly the same elements (in a different order) as it did in the first
+place.</p></li>
+</ol>
+<h1 class="en" id="synchronized-data-structures">Synchronized Data
+Structures</h1>
+<ol type="1">
+<li><p>Synchronized Lists</p>
+<ol type="a">
+<li><p>Create a method called <code>nonSyncIterate</code> which iterates
+on the elements of a a <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/Collection.html"><code
+class="sourceCode java">java<span class="op">.</span><span class="fu">util</span><span class="op">.</span><span class="fu">Collection</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span></code></a>
+using <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/Iterator.html"><code
+class="sourceCode java"><span class="bu">Iterator</span><span class="op">&lt;</span><span class="bu">Integer</span><span class="op">&gt;</span></code></a>
+and prints the elements. The method should have an additional parameter,
+a number which should also appear in the printing. Also create a method
+called <code>syncIterate</code> which calls the former one in a
+<code>synchronized</code> block. The lock object must be the
+collection.</p>
+<p>Create the list the following ways, using a lot of (e.g. 100_000)
+elements:</p>
+<ul>
+<li>Simple <code>ArrayList</code></li>
+<li>Simple <code>LinkedList</code></li>
+<li>Simple <code>Vector</code></li>
+<li>A synchronized data structure <a
+href=""><code>Collections.synchronizedCollection</code></a> created from
+one of the above</li>
+<li>A synchronized data structure <a
+href=""><code>Collections.synchronizedList</code></a> created from one
+of the above</li>
+</ul>
+<p>Try the following with as many combinations as possible of the
+various methods and data structures and inspect the structure of the
+output.</p>
+<p>Start two threads. Both threads must call the chosen method and pass
+the reference to the list and its own number.</p></li>
+<li><p>🏠 Homework: we have two shared lists, <code>original</code> and
+<code>result</code>. The second one is empty at the start, the first one
+is filled with <code>1, 2, ...</code>, the last value being
+<code>THREAD_COUNT * ELEMS_PER_THREAD</code> where
+<code>THREAD_COUNT</code> is at least 2 and
+<code>ELEMS_PER_THREAD</code> is quite large (say,
+<code>100_000</code>).</p>
+<ul>
+<li>Let an <code>ExecutorService</code> run <code>THREAD_COUNT</code>
+tasks that repeat the following <code>ELEMS_PER_THREAD</code> times: <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/List.html#remove(int)"><code>remove</code></a>
+the first element of <code>original</code> and <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/List.html#add(int,E)"><code>add</code></a>
+it to the beginning of <code>result</code>.</li>
+<li>Stop the <code>ExecutorService</code> and print the first 100
+elements of <code>result</code>.
+<ul>
+<li>Most executions will end with a
+<code>ConcurrentModificationException</code>.</li>
+<li>Try the same with synchronized lists. The exception should go
+away.</li>
+</ul></li>
+</ul></li>
+</ol></li>
+<li><p><code>ConcurrentMap</code></p>
+<ol type="a">
+<li><p>We have a calendar where we schedule meetings. One meeting takes
+10 minutes and must not conflict with each other. 10 threads schedule
+5000 meetings per thread into the calendar while another 10 threads
+delete 2500 meetings per thread from the calendar. There is a 21st
+thread which looks for and prints the next meeting every 10
+milliseconds.</p>
+<p>Since our program utilizes the plain <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/HashMap.html"><code>java.util.HashMap</code></a>
+to store the meetings, which is not thread-safe, it does not terminate
+in most cases but throws a <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/ConcurrentModificationException.html"><code>ConcurrentModificationException</code></a>.
+Fix the program. To achieve this, use method <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/Collections.html#synchronizedMap(java.util.Map)"><code>java.util.Collections.synchronizedMap()</code></a>
+which we already used earlier and also do not forget to manually
+synchronize the iteration.</p></li>
+<li><p>Modify the previous solution where you replace method call to
+<code>java.util.Collections.synchronizedMap()</code> with a new data
+structure <a
+href="https://docs.oracle.com/en/java/javase/11/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html"><code>java.util.concurrent.ConcurrentHashMap</code></a>.
+Also remove the synchronized block surrounding the iteration because
+using this type it is not necessary anymore. Observe (by counting the
+printed lines) the speed difference between the two solutions.</p></li>
+<li><p>Create a program which uses some synchronized version of
+<code>Map</code>: call insertions, deletions and iterations from many
+threads. You program should be as simple as possible, you do not have to
+make it as complicated as the solution of the previous assignment.</p>
+<p>Demonstrate with your program that for some values of the parameters
+(e.g. the number of threads or the elements to be inserted into the
+<code>Map</code>) the <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/Collections.html#synchronizedMap(java.util.Map)"><code>synchronizedMap()</code></a>
+but for other values of the parameters <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/ConcurrentHashMap.html"><code>ConcurrentHashMap</code></a>
+is the faster.</p></li>
+<li><p>🏠 Homework: simulate a stock exchange. The prices (a floating
+point number) of stocks (3 capital letters) are stored in a map, each
+stock starts from $100. We have 100 brokers who randomly buy and sell
+stocks for 10000 rounds. If a broker buys a stock, its price goes up by
+1%, if he/she sells it, then it goes down by 1%. There is also a
+separate thread that periodically (1 secs) prints the actual stock
+prices. Use <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/Collections.html#synchronizedMap(java.util.Map)"><code>Collections.synchronizedMap()</code></a>
+to ensure thread safety of the map.</p></li>
+<li><p>🏠 Homework: change your previous solution to use <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/Collections.html#synchronizedMap(java.util.Map)">ConcurrentHashMap</a>.
+Since stocks are independent of each other, do not unneccessarily
+synchronize the iteration.</p></li>
+</ol></li>
+<li><p><code>BlockingQueue</code></p>
+<p>You can download the skeleton for the following exercises under the
+name <code>PipelineN.java</code> (<code>N</code>=1,2,3).</p>
+<ol type="a">
+<li>Create two <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/BlockingQueue.html"><code>BlockingQueue</code></a>s:
+the first carries texts, the second one carries numbers.
+<ul>
+<li>Use <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/ArrayBlockingQueue.html"><code>ArrayBlockingQueue</code></a>
+or <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/LinkedBlockingQueue.html"><code>LinkedBlockingQueue</code></a>
+for instantiation.</li>
+<li>Create three threads. The firs one submits some texts to the first
+queue.</li>
+<li>Alternatively, you may read the texts from a file.</li>
+<li>Another thread reads the texts from the first queue and puts their
+lengths into the second one.</li>
+<li>A third thread reads the numbers from the second queue and writes
+them to the standard output.</li>
+<li>Put a special terminator element (<code>""</code>,
+<code>Integer.MAX_VALUE</code>) into the queues as the last element to
+indicate that no more elements are forthcoming.</li>
+<li>To better distinguish these terminators, they should have clearly
+marked variable names such as NO_FURTHER_INPUT1 and
+NO_FURTHER_INPUT2.</li>
+<li>Finally, stop the thread pool that handles the threads of the
+exercise.</li>
+</ul></li>
+<li>Make a pipeline with many components.
+<ul>
+<li>We have many functions (all of them use different formulas) that
+look like this:
+<code>Function&lt;Integer, Integer&gt; fun = n -&gt; 2 * n + 1;</code></li>
+<li>The type <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/function/Function.html"><code>java.util.function.Function</code></a>
+has to be imported to use it.</li>
+<li>Invoke the function with an argument like this:
+<code>fun.apply(123)</code></li>
+<li>The pipeline has a first stage, a last stage, and several
+intermediate stages.</li>
+<li>The first stage takes some numbers and puts them into the first <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/BlockingQueue.html"><code>BlockingQueue</code></a>.</li>
+<li>The intermediate stages take the incoming numbers from the
+appropriate <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/BlockingQueue.html"><code>BlockingQueue</code></a>,
+invoke the appropriate function, and put the result of the computation
+into the next <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/BlockingQueue.html"><code>BlockingQueue</code></a>.</li>
+<li>The final stage prints the elements coming out of the last
+queue.</li>
+</ul></li>
+<li>Create a pipeline to filter primes.
+<ul>
+<li>The pipeline has stageCount components. <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/BlockingQueue.html"><code>BlockingQueue</code></a>s
+connect neighbouring stages, and there is also a final <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/BlockingQueue.html"><code>BlockingQueue</code></a>.</li>
+<li>The first <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/BlockingQueue.html"><code>BlockingQueue</code></a>
+gets the numbers 3, 5, 7, … up to a given upper limit, and finally
+Integer.MAX_VALUE to indicate the end of the input.</li>
+<li>To represent the stages, put a total of stageCount Callables into a
+thread pool that do the following.</li>
+<li>Each Callable uses two neighbouring <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/BlockingQueue.html"><code>BlockingQueue</code></a>s.</li>
+<li>The stage takes the first incoming number. This will be the prime of
+the stage.</li>
+<li>The stage then takes all other incoming numbers.</li>
+<li>If it finds Integer.MAX_VALUE, it sends it on, and then the stage is
+done.</li>
+<li>Otherwise: if prime divides the number, it gets filtered out (it is
+put into a local list). If there is a remainder, the number is possibly
+a prime, so it is placed into the next <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/BlockingQueue.html"><code>BlockingQueue</code></a>.</li>
+<li>At the end of the stage, the Callable returns the list of filtered
+numbers.</li>
+<li>A thread pool starts all stages using invokeAll. Then get their
+results (the filtered out numbers) and print them.</li>
+<li>Also print the remaining elements, which are (almost) guaranteed to
+be primes.</li>
+<li>The output should look like this.</li>
+</ul>
+<pre><code>[9, 15, 21, 27, 33, 39, 45, 51, 57, 63, 69, 75, 81, 87, 93, 99]
+[25, 35, 55, 65, 85, 95]
+[49, 77, 91]
+[]
+[]
+[]
+[]
+Remaining: [23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]</code></pre>
+<ul>
+<li>If the Callables also store the values of their primes in an array,
+the printout can look even better.</li>
+</ul>
+<pre><code>Filtered by 3: [9, 15, 21, 27, 33, 39, 45, 51, 57, 63, 69, 75, 81, 87, 93, 99]
+Filtered by 5: [25, 35, 55, 65, 85, 95]
+Filtered by 7: [49, 77, 91]
+Filtered by 11: []
+Filtered by 13: []
+Filtered by 17: []
+Filtered by 19: []
+Remaining: [23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97]</code></pre></li>
+</ol></li>
+</ol>
+<ol type="1">
+<li><p>The Sleeping Barber Problem</p>
+<ol type="a">
+<li><p>A barber has one barber’s chair in a cutting room and a waiting
+room containing a number of chairs in it. When the barber finishes
+cutting a customer’s hair, he dismisses the customer and goes to the
+waiting room to see if there are others waiting. If there are, he brings
+one of them back to the chair and cuts their hair. If there are none, he
+returns to the chair and sleeps in it. Each customer, when they arrive,
+looks to see what the barber is doing. If the barber is sleeping, the
+customer wakes him up and sits in the cutting room chair. If the barber
+is cutting hair, the customer stays in the waiting room. If there is a
+free chair in the waiting room, the customer sits in it and waits their
+turn. If there is no free chair, the customer leaves.</p>
+<p>The simulation of the barber shop is partially implemented in
+<code>BarberShop.java</code>. Your task is to fill in the missing parts
+which are the barbers sleep and the customers wake up tasks. Implement
+them using the methods <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Object.html#wait()"><code>wait()</code></a>
+and <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Object.html#notify()"><code>notify()</code></a>.</p></li>
+<li><p>Enhancement</p>
+<p>Interrupting the thread <code>Barber</code> is not elegant. Instead,
+use method <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Object.html#wait(long)"><code>wait(long timeoutMillis)</code></a>
+to limit the length of the barber’s sleep.</p></li>
+</ol></li>
+<li><p>🏠 Homework: Custom Blocking Queue</p>
+<ol type="a">
+<li>Implement a very simple blocking queue using the wait &amp; notify
+technique. Use one our earlier assignments to test it. It is enough to
+implement the <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/concurrent/BlockingQueue.html#take()"><code>take()</code></a>
+method. Since the queue is not aware of the threads waiting for the
+queue, use the <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/lang/Object.html#notifyAll()"><code>notifyAll()</code></a>
+method to wake up any thread. Extend interface <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/Queue.html"><code>Queue</code></a>
+and any of its implementations, e.g. <a
+href="https://docs.oracle.com/en/java/javase/19/docs/api/java.base/java/util/ArrayDeque.html"><code>ArrayDeque</code></a>.</li>
+</ol></li>
+</ol>
+<h1 class="en" id="exercise">Exercise</h1>
+<ol type="1">
+<li><p>In this exercise, we create the representation of an auction
+house that employs modern artists who sell their works using <a
+href="https://en.wikipedia.org/wiki/Non-fungible_token">Non-fungible
+tokens</a>, abbreviated as NFT. We will handle these tokens, the works
+do not appear directly.</p>
+<p>In the text, uppercase names are constants that are found in the
+downloadable <code>AuctionHouse.java</code>. In the same file, you will
+find the <code>runChecks()</code> method that main calls as the last
+step. This is the tester utility. At the end of the file, there are two
+helper methods which you can use: <code>sleepForMsec</code> lets the
+program do nothing for the given amount of milliseconds, and
+<code>getRandomBetween</code> can generate random numbers in an
+interval.</p>
+<ol type="a">
+<li><p><code>Artist</code></p>
+<p>In this task and all the others, write code that avoids bad things
+like race conditions and deadlocks.</p>
+<p>You will have to fill in the TODOs in <code>AuctionHouse.java</code>
+based on the description.</p>
+<p>Main will create and run the artists (and all the other participants
+of the system, to be described in the following exercises) on a thread
+each, and then waits for everyone to finish up. If you write your
+program well, all actors will stop working by themselves.</p>
+<p>We employ <code>ARTIST_COUNT</code> artists. They create works of art
+every 20 milliseconds with a price randomly chosen between 100..1000,
+and they put it in the first available element of the <code>nfts</code>
+array. If there is no more space left there, or if the total cost of the
+NFTs would exceed <code>remainingNftPrice</code>, then the artist stops
+working.</p></li>
+<li><p>🏠 Homework: <code>Auctioneer</code></p>
+<p>The auctioneer works as long as there is at least one active artist,
+and once they are all done, he does 100 more auctions.</p>
+<ul>
+<li>Use <a
+href="https://docs.oracle.com/en/java/javase/17/docs/api/java.base/java/lang/Thread.html#isAlive()">the
+<code>isAlive()</code> method</a> to detect whether the other threads
+are alive.</li>
+</ul>
+<p>All auctions begin with the auctioneer choosing one of the already
+created NFTs, and it creates a <code>BlockingQueue</code> in the
+variable <code>auctionQueue</code>. In a later task, art collectors will
+send their <code>AuctionBid</code>s in it.</p>
+<ul>
+<li>In this Task, nobody will send bids, but we already prepare
+ourselves for the eventuality.</li>
+<li>The auctioneer checks if a bid is incoming on
+<code>auctionQueue</code>. He does it at most
+<code>MAX_AUCTION_BIDS</code> times, and he is willing to wait at most
+one millisecond each time. If the bid has a higher sum than all previous
+ones, then this is considered to be the best bid so far.
+<ul>
+<li>Note that especially at the beginning, it can happen that no NFTs
+are available yet. Obviously, it’s impossible to begin an auction like
+that.</li>
+</ul></li>
+<li>If the waiting times out, or there have already been
+<code>MAX_AUCTION_BIDS</code> rounds, the auctioneer finishes the
+auction.
+<ul>
+<li>The auctioneer stores the name of the art collector with the winning
+bid. You only need to remember the names of those art collectors who
+have already won (at least once).</li>
+<li>Increase <code>soldItemCount</code> by one.</li>
+<li>Increase <code>totalCommission</code> by 10% of the total price: the
+base cost of the NFT plus the best bid.</li>
+</ul></li>
+<li>Let’s have 3 milliseconds of “pause” between auctions: during this
+time, let <code>auctionQueue</code> be <code>null</code>.</li>
+</ul></li>
+<li><p>🏠 Homework: Art collector</p>
+<p>Let there be <code>COLLECTOR_COUNT</code> art collectors with the
+names <code>Collector1</code>, <code>Collector2</code> etc. They
+continue bidding as long as the auctioneer’s working (that is, his
+thread is active).</p>
+<p>The art collector sleeps randomly for
+<code>COLLECTOR_MIN_SLEEP</code>..<code>COLLECTOR_MAX_SLEEP</code>
+seconds before attempting to bid.</p>
+<p>He then checks whether there is an ongoing auction (does
+<code>auctionQueue</code> hold a valid object). If not, he increases
+<code>noAuctionAvailableCount</code> and starts waiting again.</p>
+<p>If there is an ongoing auction, he makes a bid with a price randomly
+chosen between <code>1</code>..<code>MAX_COLLECTOR_BID</code> except if
+he has already participated in this auction.</p></li>
+</ol></li>
+</ol>
+<h1 class="en" id="assignments">Assignments</h1>
+<ol type="1">
+<li><p>Will be available later.</p></li>
+<li><p>Will be available later.</p></li>
+</ol>
+</body>
+</html>
