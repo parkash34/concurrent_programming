@@ -56,10 +56,10 @@ public class ThreadSafeMutableInteger {
             });
         }   
 
-        // long l = System.nanoTime();
-        // for(int i = 0; i < ts.length; i++)  ts[i].start();
-        // for(int i = 0; i < ts.length; i++)  ts[i].join();
-        // System.out.println("Time: "+ (System.nanoTime() - l)*1e-9 + "s");
-        // System.out.println("Result: "+ tsmi.get());
+        long l = System.nanoTime();
+        for(int i = 0; i < ts.length; i++)  ts[i].start();
+        for(int i = 0; i < ts.length; i++)  ts[i].join();
+        System.out.println("Time: "+ (System.nanoTime() - l)*1e-9 + "s");
+        System.out.println("Result: "+ tsmi.get());
     }
 }
