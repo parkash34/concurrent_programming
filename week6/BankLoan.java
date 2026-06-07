@@ -29,9 +29,9 @@ public class BankLoan{
                 } catch(Exception e) {e.printStackTrace(); return null;}
             }));
         }
-        es.shutdown();
-        es.awaitTermination(5, TimeUnit.SECONDS);
-        es.shutdownNow();
+        // es.shutdown();
+        // es.awaitTermination(5, TimeUnit.SECONDS);
+        // es.shutdownNow();
         int total = 0;
         for(int i = 0; i < clientTotals.length; i++){
             total += futures.get(i).get();
