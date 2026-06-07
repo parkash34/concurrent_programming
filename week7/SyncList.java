@@ -41,10 +41,10 @@ public class SyncList {
                     }
                 });
             }
-            // for(int i = 0; i < ts.length; i++) ts[i].start();
-            // for(int i = 0; i < 100_000; i++) coll.add(i);
-            // running.set(false);
-            // for(int i = 0; i < ts.length; i++) ts[i].join();
+            for(int i = 0; i < ts.length; i++) ts[i].start();
+            for(int i = 0; i < 100_000; i++) coll.add(i);
+            running.set(false);
+            for(int i = 0; i < ts.length; i++) ts[i].join();
         }      
     }
 }
