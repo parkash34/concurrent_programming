@@ -70,8 +70,8 @@ public class Pipeline3 {
 
     private static void initQueue(int bound, ArrayBlockingQueue<Integer> queue0) {
         // TODO: 3, 5, 7, ..., NO_FURTHER_INPUT ====> queue #0
-        // for(int i = 3; i < bound; i += 2)
-        //     queue0.add(i);
-        // queue0.add(NO_FURTHER_INPUT);
+        for(int i = 3; i < bound; i += 2)
+            queue0.add(i);
+        queue0.add(NO_FURTHER_INPUT);
     }
 }
