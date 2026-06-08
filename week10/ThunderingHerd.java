@@ -30,9 +30,9 @@ public class ThunderingHerd {
             }
             Thread.sleep(1);
         }
-        // for(int i = 0; i < ts.length; i++) ts[i].interrupt();
-        // for(int i = 0; i < ts.length; i++) ts[i].join();
-        // System.out.println(resource.get());
+        for(int i = 0; i < ts.length; i++) ts[i].interrupt();
+        for(int i = 0; i < ts.length; i++) ts[i].join();
+        System.out.println(resource.get());
 
     }
 }
